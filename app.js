@@ -5,7 +5,7 @@
  * Versão: 1.0
  ************Obsrvações: Para criar a api precisamos instalar:
  * express               npm install express --save 
- * cors                  npm install cors --save 
+ * cors                    
  * body-parser           npm install body-parser --save
  
  ************Para criar a conexão com o banco de dados Mysql precisamos instalar :
@@ -14,18 +14,17 @@
  * 
  * 
  * apos a instalação é nessario inicializar o prisma 
-     npx prisma init
+   npx prisma init
 
  * para sincronizar o prisma com o banco de dados com o banco podemos utlizar o 
-     npx prisma migrate dev  
- **************************************************************************/
-
+   npx prisma migrate dev  
+**************************************************************************/
      const express = require('express')
      const cors = require('cors')
      const bodyParser = require('body-parser')
      
      //Import das controllers do projeto
-     const controllerMusica = require('./controller/Musica/controllerMusica.js')
+     const controllerMusica = require('./controller/musica/controllerMusica.js')
 
      //Criando o formato de dados que sera recebido no body da requisição (POST/PUT)
      const bodyParserJSON = bodyParser.json() 
@@ -46,24 +45,14 @@
      //EndPoint para inserir uma musica
      app.post('/v1/controle-musicas/musica', cors(), bodyParserJSON, async function(request, response) {
          //Recebe os dados encaminhados no body da requisição
-         let contentType = request.headers['content-type']
+        let dadosBody = request.body
 
-         let dadosBody = request.body
-
-        let result = await controllerMusica.inserirMusica(dadosBody, contentType)
+        let result = await controllerMusica.inserirMusica(dadosBody)
 
         response.status(result.status_code)
         response.json(result)
 
 
-     })
-
-     app.get('/v1/controle-musicas/musica',cors(), async function (request, response) {
-        //chama a função para retornar lista de musica
-        let result = await controllerMusica.listarMusica()
-
-        response.status(result.status_code)
-        response.json(result)
      })
 
     app.listen(8080, function (){
@@ -71,4 +60,23 @@
     })
 
 
- 
+//////////////////////////////////////////////////////////////////////////////// 
+    //Import das controllers do projeto
+    const controllerArtista= require('./controller/Artista/controllerArtista.js')
+
+    //EndPoint para inserir uma musica
+    app.post('/v1/controle-artista/artista', cors(), bodyParserJSON, async function(request, response) {
+        //Recebe os dados encaminhados no body da requisição
+       let dadosBody = request.body
+
+       let result = await controllerMusica.inserirMusica(dadosBody)
+
+       response.status(result.status_code)
+       response.json(result)
+
+
+    })
+
+   app.listen(8080, function (){
+       console.log('Servidor aguardando novas requisições...')
+   })
