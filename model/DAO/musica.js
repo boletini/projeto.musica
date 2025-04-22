@@ -4,70 +4,121 @@
  * Autor: Beatriz Boletini
  * Versão: 1.0
  **************************************************************/
-//Import da biblioteca do prisma/Client
-const {PrismaClient} = require('@prisma/client')
+//import da biblioteca Prisma/Client
+const { PrismaClient } = require('@prisma/client')
 
+//instanciando (criar um novo objeto) para realizar a manipulação do script SQL
+const prisma = new PrismaClient()
 
-//Função para inserir uma nova musica no banco de dados
+//função para inserir uma nova música no banco de dados
 const insertMusica = async function(musica){
-    
     try {
-        
-    
-        //instanciando (criar novo objeto) para realizar a manipulação do spript SQL
-        const prisma = new PrismaClient() 
-
-        let sql = `insert into tbl_musica (nome,
-                                        link,
-                                        duracao,
-                                        data_lancamento,
-                                        foto_capa,
-                                        letra
-                                      )
-                                values( 
+        let sql = `insert into tbl_musica ( nome,
+                                            link,
+                                            duracao,
+                                            data_lancamento,
+                                            foto_capa,
+                                            letra
+                                            )
+                                    values (
                                             '${musica.nome}',
                                             '${musica.link}',
-
                                             '${musica.duracao}',
                                             '${musica.data_lancamento}',
                                             '${musica.foto_capa}',
                                             '${musica.letra}'
-                                        )`
-                                        
+                                            )`
 
-        // Executa o spript SQL no BD e aguarde o retorno do BD                                        
-        let result = await prisma.$executeRawUnsafe(sql)  
-     
-        if (result)
+        //executa o script SQL no DB e aguarda o retorno do DB
+        let result = await prisma.$executeRawUnsafe(sql)
+
+        if(result)
             return true
         else
-         return false
+            return false
+        
 
     } catch (error) {
         return false
     }
-
-
 }
 
-//função para atualizar uma musica existente no banco de dados
-const updateMusica = async function(){
+//função para atualizar uma música existente no banco de dados
+const updateMusica = async function(musica){
+    try {
+        let sql = `update tbl_musica set  nome = '${musica.nome}',
+                                            link = '${musica.link}',
+                                            duracao = '${musica.duracao}',
+                                            data_lancamento = '${musica.data_lancamento}',
+                                            foto_capa = '${musica.foto_capa}',
+                                            letra = '${musica.letra}'
+                            where id=${musica.id}
+                                            `
+        let result = await prisma.$executeRawUnsafe(sql)
 
+        if(result)
+            return true
+        else
+            return false
+    } catch (error) {
+        return false
+    }
 }
 
-//função para excluir uma musica existente no banco de dados
-const deleteMusica = async function(){
+//função para excluir uma música existente no banco de dados
+const deleteMusica = async function(id){
+    try {
+        //script sql
+        let sql = 'delete from tbl_musica where id='+id
+        
+        //executa o script
+        let result = await prisma.$executeRawUnsafe(sql)
 
+        if(result)
+            return true
+        else
+            return false
+
+    } catch (error) {
+        return false
+    }
 }
 
-// Função para retornar todas as musicas do banco de dados
+//função para retornar todas as músicas do banco de dados
 const selectAllMusica = async function(){
+    try {
+        // script SQL
+        let sql = 'select * from tbl_musica order by id desc'
 
+        //executa o script sql no db e aguarda o retorno dos dados
+        let result = await prisma.$queryRawUnsafe(sql)
+
+        if(result)
+            return result
+        else
+            return false
+    } catch (error) {
+        return false
+    }
 }
 
-// Função para buscar uma musica pelo ID no banco de dados
-const selectByIdMusica = async function(){
+//função para listar uma música pelo ID no banco de dados
+const selectByIdMusica = async function(id){
+    try {
+        //script sql
+        let sql = 'select * from tbl_musica where id='+id
 
+        //executa o script
+        let result = await prisma.$queryRawUnsafe(sql)
+
+        if(result)
+            return result
+        else
+            return false
+
+    } catch (error) {
+        return false
+    }
 }
 
 module.exports = {
