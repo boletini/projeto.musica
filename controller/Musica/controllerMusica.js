@@ -4,166 +4,195 @@
  * Autor: Beatriz Boletini
  * Versão: 1.0
  ***************************************************/
-//import do arquivo de configurações de mensagens de status cpde
-const MESSAGE = require('../../modulo/config.js')
+//import do arquivo de menssagens e status code 
+const message = require ('../../modulo/config.js')
 
-//import do arquivo DAO de música para manipular o db
-const musicaDAO = require('../../model/dao/musica.js')
-const { json } = require('body-parser')
+//import do DAO para realizar o CRUD no Banco de Dados 
+const musicaDAO = require ('../../model/DAO/musica.js')
 
-//função para inserir uma nova música
-const inserirMusica = async function(musica, contentType){
-    // try catch é uma forma de tratar o código para que a API não caia
+// Função para inserir nova música 
+const inserirMusica = async function(musica, contentType) {
     try {
-
-        if(String(contentType) .toLowerCase() == 'application/json')
+        if(String(contentType).toLowerCase() == 'application/json')
         {
-        if (musica.nome == undefined || musica.nome == '' || musica.nome == null || musica.nome.length > 80 ||
-            musica.duracao == undefined || musica.duracao == '' || musica.duracao == null || musica.duracao.length > 5 ||
-            musica.data_lancamento == undefined || musica.data_lancamento == '' || musica.data_lancamento == null || musica.data_lancamento.length > 10 ||
-            musica.foto_capa == undefined || musica.foto_capa.length > 200 ||
-            musica.letra == undefined
-        ){
-            return MESSAGE.ERROR_REQUIRE_FIELDS
-        }else{
-            let resultMusica = await musicaDAO.insertMusica(musica)
-    
-            if(resultMusica)
-                return MESSAGE.SUCCESS_CREATED_ITEM //201
-            else
-                return MESSAGE.ERROR_INTERNAL_SERVER_MODEL //500
-        }
-    }else{
-        return MESSAGE.ERROR_CONTENT_TYPE //415
-    }
-
-    } catch (error) {
-        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
-    }
-}
-
-//função para atualizar uma música existente
-const atualizarMusica = async function(musica, id, contentType){
-    try {
-        if(String(contentType) .toLowerCase() == 'application/json')
+            if ( musica.nome            == ''        || musica.nome             == null || musica.nome             == undefined || musica.nome.length               > 100 || 
+                musica.duracao          == ''        || musica.duracao          == null || musica.duracao          == undefined || musica.duracao.length            > 8   ||
+                musica.data_lancamento  == ''        || musica.data_lancamento  == null || musica.data_lancamento  == undefined || musica.data_lancamento.length    > 10  ||
+                musica.link             == undefined || musica.link.length      > 200   ||
+                musica.letra            == undefined 
+            )
             {
-            if (musica.nome == undefined || musica.nome == '' || musica.nome == null || musica.nome.length > 80 ||
-                musica.duracao == undefined || musica.duracao == '' || musica.duracao == null || musica.duracao.length > 5 ||
-                musica.data_lancamento == undefined || musica.data_lancamento == '' || musica.data_lancamento == null || musica.data_lancamento.length > 10 ||
-                musica.foto_capa == undefined || musica.foto_capa.length > 200 ||
-                musica.letra == undefined || id == '' || id == undefined || id == null || isNaN(id) || id <= 0
-            ){
-                return MESSAGE.ERROR_REQUIRE_FIELDS //400
+                return message.ERROR_REQUIRED_FIELDS //status code 400
             }else{
-                //validar se o id existe no db
-                let resultMusica = await buscarMusica(id)
+                //encaminhando os dados da música para o DAO realizar o insert no Banco de dados 
+                let resultMusica = await musicaDAO.insertMusica(musica)
 
-                if(resultMusica.status_code == 200){
-                    //update
-                    musica.id = id //adiciona o atributo id no json e coloca o id da música que chegou na controller
-                    let result = await musicaDAO.updateMusica(musica)
+                if(resultMusica)
+                    return message.SUCESS_CREATED_ITEM //status code 201
+                else
+                    return message.ERROR_INTERNAL_SEVER_MODEL //status code 500 -> erro model
+            }
+        }else{
+            return message.ERROR_CONTENT_TYPE //status code 415
+        }
+    } catch (error) {
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // status code 500 -> erro controller
+    }
+}
 
-                    if(result){
-                        return MESSAGE.SUCCESS_UPDATED_ITEM //200
-                    }else{
-                        return MESSAGE.ERROR_INTERNAL_SERVER_MODEL //500
+// Função para atualizar uma música 
+const atualizarMusica = async function(numero, musica, contentType) {
+     try {
+        let id = numero
+
+        // Copiamos o início do código inserir musica
+        if(String(contentType).toLowerCase() == 'application/json')
+            {
+                if ( musica.nome            == ''        || musica.nome             == null || musica.nome             == undefined || musica.nome.length               > 100 || 
+                    musica.duracao          == ''        || musica.duracao          == null || musica.duracao          == undefined || musica.duracao.length            > 8   ||
+                    musica.data_lancamento  == ''        || musica.data_lancamento  == null || musica.data_lancamento  == undefined || musica.data_lancamento.length    > 10  ||
+                    musica.link             == undefined || musica.link.length      > 200   ||
+                    musica.letra            == undefined ||
+                    id                      == ''        || id                      == null || id                      == undefined || isNaN(id)
+                )
+                {
+                    return message.ERROR_REQUIRED_FIELDS //status code 400
+                }else{
+
+                    // Verifica se o ID está no Banco de dados 
+                    let result = await musicaDAO.selectByIdMusica(id)
+
+                    if(result != false || typeof(result) == 'object'){
+
+                        if(result.length > 0){
+
+                            //UPDATE 
+                            musica.id = id // Adiciona o atributo do ID no JSON (musica) -> com o corpo da requisição
+                            let resultMusica = await musicaDAO.updateMusica(musica)
+
+                            if(resultMusica){
+                                return message.SUCESS_UPDATE_ITEM // 200
+                            }else{
+                                return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
+                            }
+
+                        }else{
+                            return message.ERROR_NOT_FOUND // 404
+                        }
                     }
-
-                }else if(resultMusica.status_code == 404){
-                    return MESSAGE.ERROR_NOT_FOUND //404
-                }else{
-                    return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
                 }
-            }
-        }else{
-            return MESSAGE.ERROR_CONTENT_TYPE //415
-        }
-    } catch (error) {
-        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
-    }
-}
 
-//função para excluir uma música existente
-const excluirMusica = async function(id){
-    try {
-        if(id == '' || id == undefined || id == null || isNaN(id) || id <= 0){
-            return MESSAGE.ERROR_REQUIRE_FIELDS //400
-        }else{
-            // validar se o ID existe
-            let resultMusica = await buscarMusica(id)
-
-            if(resultMusica.status_code == 200){
-                // delete da musica
-                let result = await musicaDAO.deleteMusica(id)
-                if(result){
-                    return MESSAGE.SUCCESS_DELETED_ITEM //200
-                }else{
-                    return MESSAGE.ERROR_INTERNAL_SERVER_MODEL //500
-                }
-            }else if(resultMusica.status_code == 404){
-                return MESSAGE.ERROR_NOT_FOUND //404
             }else{
-                return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
+                return message.ERROR_CONTENT_TYPE // 415
+            }
+
+     } catch (error) {
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500- controller
+     }
+}
+
+// Função para excluir uma música 
+const excluirMusica = async function(numero) {
+    try {
+        let id = numero
+
+        if ( id == ''|| id == null || id == undefined || isNaN(id)){
+            return message.ERROR_REQUIRED_FIELDS // status code 400
+        }else{
+            
+            // Antes de excluir, estamos verificando se existe esse id 
+            let resultMusica = await musicaDAO.selectByIdMusica(id)
+
+            if(resultMusica != false || typeof(resultMusica) == 'object'){
+
+                if(resultMusica.length > 0){
+
+                    // Chama a função para retornar as músicas do banco de dados
+                    let result = await musicaDAO.deleteMusica(id)
+                    
+                    if(result)
+                        return message.SUCESS_DELETE_ITEM // 200
+                    else
+                        return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
+
+                }else{
+                    return message.ERROR_NOT_FOUND // 404
+                }
+
+
+            }else{
+                return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
             }
         }
+
     } catch (error) {
-        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500
     }
 }
 
-//função para retornar todas as música
-const listarMusica = async function(){
+// Função para retornar uma lista de músicas 
+const listarMusica = async function() {
     try {
+        // Objeto JSON
         let dadosMusica = {}
 
-        //chamar a função que retorna as musicas
+        // Chama a função para retornar as músicas do banco de dados
         let resultMusica = await musicaDAO.selectAllMusica()
 
-        if(resultMusica != false || typeof(resultMusica) == 'object')
-        {
-            //criando um objeto JSON para retornar a lista de musicas
+        if(resultMusica != false || typeof(resultMusica) == 'object'){
             if(resultMusica.length > 0){
+                // Cria um JSON para colocar o Array de músicas 
                 dadosMusica.status = true
-                dadosMusica.status_code = 200
-                dadosMusica.item = resultMusica.length
-                dadosMusica.musicas = resultMusica
-                return dadosMusica //200
+                dadosMusica.status_code = 200,
+                dadosMusica.items = resultMusica.length
+                dadosMusica.musics = resultMusica
+
+                return dadosMusica
             }else{
-                return MESSAGE.ERROR_NOT_FOUND //404
+                return message.ERROR_NOT_FOUND // 404
             }
         }else{
-            return MESSAGE.ERROR_INTERNAL_SERVER_MODEL //500
+            return message.ERROR_INTERNAL_SEVER_MODEL // 500
         }
+        
 
     } catch (error) {
-        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500
     }
 }
 
-//função para listar uma música pelo ID
-const buscarMusica = async function(id){
+// Função para retornar uma música pelo ID 
+const buscarMusica = async function(numero) {
     try {
-        if(id == '' || id == undefined || id == null || isNaN(id) || id <= 0){
-            return MESSAGE.ERROR_REQUIRE_FIELDS //400
+        let id = numero
+
+        // Objeto JSON
+        let dadosMusica = {}
+
+        if ( id == ''|| id == null || id == undefined || isNaN(id)){
+            return message.ERROR_REQUIRED_FIELDS // status code 400
         }else{
-            let dadosMusica = {}
+            // Chama a função para retornar as músicas do banco de dados
             let resultMusica = await musicaDAO.selectByIdMusica(id)
 
             if(resultMusica != false || typeof(resultMusica) == 'object'){
                 if(resultMusica.length > 0){
+                    // Cria um JSON para colocar o Array de músicas 
                     dadosMusica.status = true
-                    dadosMusica.status_code = 200
-                    dadosMusica.musicas = resultMusica
-                    return dadosMusica //200
+                    dadosMusica.status_code = 200,
+                    dadosMusica.musics = resultMusica
+
+                    return dadosMusica
                 }else{
-                    return MESSAGE.ERROR_NOT_FOUND //404
+                    return message.ERROR_NOT_FOUND // 404
                 }
             }else{
-                return MESSAGE.ERROR_INTERNAL_SERVER_MODEL //500
+                return message.ERROR_INTERNAL_SEVER_MODEL // 500
             }
         }
+
     } catch (error) {
-        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500
     }
 }
 

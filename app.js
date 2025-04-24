@@ -19,12 +19,30 @@
  * para sincronizar o prisma com o banco de dados com o banco podemos utlizar o 
    npx prisma migrate dev  
 **************************************************************************/
-const express = require('express')
-const cors = require('cors')
+// Import das bibliotecas para criar a API
+const express    = require('express')
+const cors       = require('cors')
 const bodyParser = require('body-parser')
 
-//import das controllers do projeto
-const controllerMusica = require('./controller/Musica/controllerMusica')
+// Cria um objeto para o Body do tipo JSON 
+const bodyParserJSON = bodyParser.json()
+
+// Cria um objeto do app para criar a API 
+const app = express()
+
+// Configurações de permissões do CORS para a API 
+app.use((request, response, next)=>{
+
+    response.header('Access-Control-Allow-Origin', '*')
+    response.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+
+    app.use(cors())
+
+    next()
+})
+
+// Import das Controller do projeto 
+const controllerMusicas = require('./controller/musica/controllerMusica')
 
 //EndPoint para inserir uma música 
 app.post('/v1/controle-musicas/musica', cors(), bodyParserJSON, async function(request, response){
@@ -94,11 +112,40 @@ app.put('/v1/controle-musicas/musica/:id', cors(), bodyParserJSON, async functio
     response.status(resultMusica.status_code)
     response.json(resultMusica)
 })
+// ///////////////////////////////////////////////////////crud artista/////////////////////////////////////////////////////////////////
 
-
-////////////////////////////////CRUD Usuario/////////////////////////////////////////////////////////
 // Import das Controller do projeto 
-const controllerUsuarios = require('./controller/usuario/controllerUsuario')
+const controllerArtista = require('./controller/Artista/controllerArtista')
+//endpoint para inserir um artista
+app.post('/v1/controle-musicas/artista', cors(), bodyParserJSON, async function(request, response){
+
+    //recebe o content type da requisição para validar o formato de dados
+    let contentType = request.headers['content-type']
+
+    //recebe os dados encaminhados no body da requisição
+    let dadosBody = request.body
+
+    let result = await controllerArtista.inserirArtista(dadosBody, contentType)
+
+    response.status(result.status_code)
+    response.json(result)
+
+    console.log(result.status_code)
+})
+
+//endpoint para retornar lista de artista
+app.get('/v1/controle-musicas/artista', cors(), async function(request, response){
+
+    //chama a função para retornar uma lista de artista
+    let result = await controllerArtista.listarArtista()
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+////////////////////////////////////////////////////////////////////CRUD USUARIO/////////////////////////////////////////////////////////////
+// Import das Controller do projeto 
+const controllerUsuarios = require('./controller/Usuario/controllerUsuario')
 
 //EndPoint para inserir um usuário 
 app.post('/v1/controle-musicas/usuario', cors(), bodyParserJSON, async function(request, response){
@@ -170,75 +217,7 @@ app.put('/v1/controle-musicas/usuario/:id', cors(), bodyParserJSON, async functi
     response.status(resultUsuario.status_code)
     response.json(resultUsuario)
 })
-////////////////////////////////////////CRUD Banda//////////////////////////////////////////////////////////////////
-
-// Import das Controller do projeto 
-const controllerBanda = require('./controller/Banda/controllerBanda')
-
-//EndPoint para inserir uma banda  
-app.post('/v1/controle-musicas/banda', cors(), bodyParserJSON, async function(request, response){
-
-    let contentType = request.headers['content-type']
-
-    let dadosBody = request.body 
-
-    // Chama a função da controller para inserir os dados e aguarda o retorno da função 
-    let resultBanda = await controllerBanda.inserirBanda(dadosBody, contentType)
-
-    // Resposta e status code 
-    response.status(resultBanda.status_code)
-    response.json(resultBanda)
-})
-
-// Endpoint para listar todas as bandas
-app.get('/v1/controle-musicas/bandas', cors(), async function(request, response){
-
-    let resultBanda = await controllerBanda.listarBanda()
-
-    response.status(resultBanda.status_code)
-    response.json(resultBanda)
-})
-
-// Endpoint para buscar banda pelo id
-app.get('/v1/controle-musicas/banda/:id', cors(), async function(request, response){
-
-    let id = request.params.id
-
-    let resultBanda = await controllerBanda.buscarBanda(id)
-
-    response.status(resultBanda.status_code)
-    response.json(resultBanda)
-})
-
-// Endpoint para deletar genero pelo ID
-app.delete('/v1/controle-musicas/banda/:id', cors(), async function(request, response){
-
-    let id= request.params.id
-
-    let resultBanda = await controllerBanda.excluirBanda(id)
-
-    response.status(resultBanda.status_code)
-    response.json(resultBanda)
-})
-
-//Endpoint para atualizar banda pelo ID
-app.put('/v1/controle-musicas/banda/:id', cors(), bodyParserJSON, async function(request, response){
-
-    let contentType = request.headers['content-type']
-
-    let idBanda = request.params.id
-
-    let dadosBody = request.body
-
-    // Chama a função e encaminha os argumentos: ID, Body e ContentType
-    let resultBanda = await controllerBanda.atualizarBanda(idBanda, dadosBody, contentType)
-
-    response.status(resultBanda.status_code)
-    response.json(resultBanda)
-})
-
-///////////////////////////////////CRUD Genero/////////////////////////////////////////////////////////////////
-
+/////////////////////////////////////////////////////////////////////////////////CRUD GENERO////////////////////////////////////////////////////////////////////////////////
 // Import das Controller do projeto 
 const controllerGenero = require('./controller/Genero/controllerGenero')
 
@@ -260,7 +239,7 @@ app.post('/v1/controle-musicas/genero', cors(), bodyParserJSON, async function(r
 })
 
 // Endpoint para listar todos os gêneros
-app.get('/v1/controle-musicas/generos', cors(), async function(request, response){
+app.get('/v1/controle-musicas/genero', cors(), async function(request, response){
 
     let resultGenero = await controllerGenero.listarGenero()
 
@@ -307,7 +286,6 @@ app.put('/v1/controle-musicas/genero/:id', cors(), bodyParserJSON, async functio
     response.status(resultGenero.status_code)
     response.json(resultGenero)
 })
-
 app.listen(8080, function(){
     console.log('API aguardando requisições ...')
 })

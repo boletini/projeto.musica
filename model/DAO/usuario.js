@@ -1,134 +1,196 @@
-/*********************************************************************************************************************************************************************************
- *Objetivo: Criar o CRUD de dados da tabela de usuários no Banco de Dados
- *Data: 15/04/2025
- *Autor: Letícia
- *Versão: 1.0
-***********************************************************************************************************************************************************************************/
+//import do arquivo de menssagens e status code 
+const message = require ('../../modulo/config.js')
 
-// Import da biblioteca do prisma client para realizar as ações no BD 
-const {PrismaClient} = require('@prisma/client')
+//import do DAO para realizar o CRUD no Banco de Dados 
+const usuarioDAO = require ('../../model/DAO/usuario.js')
 
-//Instancia da classe do Prisma Client (cria um objeto)
-const prisma = new PrismaClient()
-
-
-// Função para inserir nova música
-const insertUser = async function(user) {
+//Função para inserir novo usuário
+const inserirUsuario = async function(user, contentType) {
     try {
-        let sql = `insert into tbl_usuario ( username,
-                                            email, 
-                                            senha,  
-                                            foto)
-                                values ('${user.username}',
-                                        '${user.email}',
-                                        '${user.senha}',
-                                        '${user.foto}')`
+        if(String(contentType).toLowerCase() == 'application/json')
+        {
+            if (user.username       == ''        || user.username       == null || user.username       == undefined || user.username.length         > 100 || 
+                user.email          == ''        || user.email          == null || user.email          == undefined || user.email.length            > 100 ||
+                user.senha          == ''        || user.senha          == null || user.senha          == undefined || user.senha.length            > 100 ||
+                user.foto           == undefined || user.foto.length     > 200  
+            )
+            {
+                return message.ERROR_REQUIRE_FIEDLS //status code 400
+            }else{
+                //encaminhando os dados da música para o DAO realizar o insert no Banco de dados 
+                let resultUser = await usuarioDAO.insertUser(user)
 
-
-        // Executa o scipt SQL no BD e aguarda o resultado (true ou false)
-        // Obs: o await -> aguarda retornar o resultado, ele só funciona se tiver o async 
-        let result = await prisma.$executeRawUnsafe(sql)
-
-        if(result)
-            return true
-        else 
-            return false // BUG no BD
-
+                if(resultUser)
+                    return message.SUCESS_CREATED_ITEM //status code 201
+                else
+                    return message.ERROR_INTERNAL_SEVER_MODEL //status code 500 -> erro model
+            }
+        }else{
+            return message.ERROR_CONTENT_TYPE //status code 415
+        }
     } catch (error) {
-        return false // BUG de Programação         
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // status code 500 -> erro controller
     }
 }
 
-//Função para atualizar música existente
-const updateUser = async function(user) {
+//Função para atualizar usuário pelo id
+const atualizarUsuario = async function (numero, user, contentType) {
     try {
         
-        let sql = `update tbl_usuario set username          = '${user.username}',
-                                          email             = '${user.email}',
-                                          senha             = '${user.senha}',
-                                          foto              = '${user.foto}'
-                                    where id_usuario        =  ${user.id_usuario}`
-                                        
-        let result = await prisma.$executeRawUnsafe(sql) // Usamos o exedute porque não vai retornar dados 
+        let id = numero 
+
+        if(String(contentType).toLowerCase() == 'application/json')
+            {
+                if (user.username       == ''        || user.username       == null || user.username       == undefined || user.username.length         > 100 || 
+                    user.email          == ''        || user.email          == null || user.email          == undefined || user.email.length            > 100 ||
+                    user.senha          == ''        || user.senha          == null || user.senha          == undefined || user.senha.length            > 100 ||
+                    user.foto           == undefined || user.foto.length     > 200  
+                )
+                {
+                    return message.ERROR_REQUIRE_FIEDLS //status code 400
+                }else{
+
+                    //Verifica se existe o id no banco 
+                    let result = await usuarioDAO.selectByIdUser(id)
+
+                    if(result != false || typeof(result) == 'object'){
+
+                        if(result.length > 0){
+                            //Update 
+                            user.id_usuario = id // Adiciona o atributo do ID no Json
+                            let resultUsuario = await usuarioDAO.updateUser(user)
+
+                            if(resultUsuario){
+                                return message.SUCESS_UPDATE_ITEM // 200
+                            }else{
+                                return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
+                            }
+                        }else{
+                            return message.ERROR_NOT_FOUND // 404
+                        }
+                    }
+                }
         
-        if (result)
-            return true
-        else
-            return false
-                                                                    
+            }else{
+                return message.ERROR_CONTENT_TYPE // 415
+            }
+    
     } catch (error) {
-        return false
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500- controller
     }
+    
 }
 
-// Função para excluir música existente 
-const deleteUser = async function(number) {
+// Função para excluir um usuário
+const excluirUsuario = async function(numero) {
     try {
-        // Recebe o ID
-        let id = number 
+        let id = numero
 
-        // Script SQL 
-        let sql = `delete from tbl_usuario where id_usuario=${id}`
+        if ( id == ''|| id == null || id == undefined || isNaN(id)){
+            return message.ERROR_REQUIRED_FIELDS // status code 400
+        }else{
+            
+            // Antes de excluir, estamos verificando se existe esse id 
+            let resultUsuario = await usuarioDAO.selectByIdUser(id)
 
-        // Encaminha o Script SQL para o BD
-        let result = await prisma.$executeRawUnsafe(sql) // O delete não volta dados, por isso utiliza o execute 
-        
-        if(result)
-            return true // Não retorna dados só true 
-        else
-            return false
+            if(resultUsuario != false || typeof(resultUsuario) == 'object'){
+
+                if(resultUsuario.length > 0){
+
+                    // Chama a função para retornar as músicas do banco de dados
+                    let result = await usuarioDAO.deleteUser(id)
+                    
+                    if(result)
+                        return message.SUCESS_DELETE_ITEM // 200
+                    else
+                        return message.ERROR_INTERNAL_SERVER_MODEL // 500- model
+
+                }else{
+                    return message.ERROR_NOT_FOUND // 404
+                }
+            }else{
+                return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
+            }
+        }
 
     } catch (error) {
-        return false
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500- controller
     }
 }
 
-// Função para retornar todos os usuários do BD
-const selectAllUser = async function() {
+//Função para listar todos os usuários
+const listarUsuario = async function() {
     try {
-        // Script SQL 
-        let sql = 'select * from tbl_usuario'
+        // Objeto JSON 
+        let dadosUsuario = {}
 
-        // Encaminha o Script SQL para o BD
-        let result = await prisma.$queryRawUnsafe(sql)
+        //Chama a função da model 
+        let resultUsuario = await usuarioDAO.selectAllUser()
 
-        if(result)
-            return result // Retorna os dados do Banco 
-        else
-            return false
+        if(resultUsuario != false || typeof(resultUsuario) == 'object'){
+            if(resultUsuario.length > 0){
+                // Coloca os dados no JSON para depois retornar 
+                dadosUsuario.status = true
+                dadosUsuario.status_code = 200
+                dadosUsuario.items = resultUsuario.length
+                dadosUsuario.users = resultUsuario
+
+                return dadosUsuario
+            }else{
+                return message.ERROR_NOT_FOUND // 404
+            }
+        }else{
+            return message.ERROR_INTERNAL_SERVER_MODEL // 500 na model
+        }
 
     } catch (error) {
-        return false
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500 na controller 
     }
 }
 
-//Função para selecionar usuário buscando pelo ID
-const selectByIdUser = async function(number) {
+//Função para retornar um usuário pelo ID 
+const buscarUsuario = async function(numero) {
     try {
-        //Recebe o ID
-        let id = number 
+        let id = numero
 
-        // Script SQL
-        let sql = `select * from tbl_usuario where id_usuario=${id} `
+        // Objeto JSON
+        let dadosUsuario = {}
 
-        //Encaminha o script para o BD
-        let result = await prisma.$queryRawUnsafe(sql)
+        // Vendo se o id não está vazio e se é um número
+        if ( id == ''|| id == null || id == undefined || isNaN(id)){
+            return message.ERROR_REQUIRED_FIELDS // status code 400
 
-        if(result)
-            return result
-        else
-            return false
+        }else{
+
+            // Chama a função para retornar os usuarios do banco de dados
+            let resultUsuario = await usuarioDAO.selectByIdUser(id)
+
+            if(resultUsuario != false || typeof(resultUsuario) == 'object'){
+                if(resultUsuario.length > 0){
+                    // Cria um JSON para colocar o Array de músicas 
+                    dadosUsuario.status = true
+                    dadosUsuario.status_code = 200,
+                    dadosUsuario.user = resultUsuario
+
+                    return dadosUsuario
+                }else{
+                    return message.ERROR_NOT_FOUND // 404
+                }
+
+            }else{
+                return message.ERROR_INTERNAL_SERVER_MODEL // 500
+            }
+        }
 
     } catch (error) {
-        return false
+        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500
     }
 }
-
 
 module.exports = {
-    insertUser,
-    updateUser,
-    deleteUser,
-    selectAllUser,
-    selectByIdUser
+    inserirUsuario,
+    atualizarUsuario,
+    excluirUsuario,
+    listarUsuario,
+    buscarUsuario
 }

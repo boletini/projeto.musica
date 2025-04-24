@@ -9,27 +9,27 @@ const inserirUsuario = async function(user, contentType) {
     try {
         if(String(contentType).toLowerCase() == 'application/json')
         {
-            if (user.username       == ''        || user.username       == null || user.username       == undefined || user.username.length         > 100 || 
+            if (user.nome       == ''        || user.nome       == null || user.nome       == undefined || user.nome.length         > 100 || 
                 user.email          == ''        || user.email          == null || user.email          == undefined || user.email.length            > 100 ||
                 user.senha          == ''        || user.senha          == null || user.senha          == undefined || user.senha.length            > 100 ||
-                user.foto_perfil           == undefined || user.foto_perfil.length     > 200  
+                user.foto           == undefined || user.foto.length     > 200  
             )
             {
-                return message.ERROR_REQUIRED_FIELDS //status code 400
+                return message.ERROR_REQUIRED_FIEDLS//status code 400
             }else{
                 //encaminhando os dados da música para o DAO realizar o insert no Banco de dados 
                 let resultUser = await usuarioDAO.insertUser(user)
 
                 if(resultUser)
-                    return message.SUCESS_CREATED_ITEM //status code 201
+                    return message.SUCESS_CREATED_ITEM//status code 201
                 else
-                    return message.ERROR_INTERNAL_SERVER_MODEL //status code 500 -> erro model
+                    return message.ERROR_INTERNAL_SEVER_MODEL //status code 500 -> erro model
             }
         }else{
             return message.ERROR_CONTENT_TYPE //status code 415
         }
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // status code 500 -> erro controller
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // status code 500 -> erro controller
     }
 }
 
@@ -41,13 +41,13 @@ const atualizarUsuario = async function (numero, user, contentType) {
 
         if(String(contentType).toLowerCase() == 'application/json')
             {
-                if (user.username       == ''        || user.username       == null || user.username       == undefined || user.username.length         > 100 || 
+                if (user.nome       == ''        || user.nome       == null || user.nome       == undefined || user.nome.length         > 100 || 
                     user.email          == ''        || user.email          == null || user.email          == undefined || user.email.length            > 100 ||
                     user.senha          == ''        || user.senha          == null || user.senha          == undefined || user.senha.length            > 100 ||
-                    user.foto_perfil_perfil           == undefined || user.foto_perfil_perfil.length     > 200  
+                    user.foto           == undefined || user.foto.length     > 200  
                 )
                 {
-                    return message.ERROR_REQUIRED_FIELDS //status code 400
+                    return message.ERROR_REQUIRE_FIEDLS//status code 400
                 }else{
 
                     //Verifica se existe o id no banco 
@@ -63,7 +63,7 @@ const atualizarUsuario = async function (numero, user, contentType) {
                             if(resultUsuario){
                                 return message.SUCESS_UPDATE_ITEM // 200
                             }else{
-                                return message.ERROR_INTERNAL_SERVER_MODEL // 500- model
+                                return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
                             }
                         }else{
                             return message.ERROR_NOT_FOUND // 404
@@ -76,7 +76,7 @@ const atualizarUsuario = async function (numero, user, contentType) {
             }
     
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500- controller
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500- controller
     }
     
 }
@@ -87,7 +87,7 @@ const excluirUsuario = async function(numero) {
         let id = numero
 
         if ( id == ''|| id == null || id == undefined || isNaN(id)){
-            return message.ERROR_REQUIRED_FIELDS // status code 400
+            return message.ERROR_REQUIRE_FIEDLS// status code 400
         }else{
             
             // Antes de excluir, estamos verificando se existe esse id 
@@ -101,20 +101,20 @@ const excluirUsuario = async function(numero) {
                     let result = await usuarioDAO.deleteUser(id)
                     
                     if(result)
-                        return message.SUCESS_DELETE_ITEM // 200
+                        return message.SUCESS_DELETED_ITEM // 200
                     else
-                        return message.ERROR_INTERNAL_SERVER_MODEL // 500- model
+                        return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
 
                 }else{
                     return message.ERROR_NOT_FOUND // 404
                 }
             }else{
-                return message.ERROR_INTERNAL_SERVER_MODEL // 500- model
+                return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
             }
         }
 
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500- controller
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500- controller
     }
 }
 
@@ -140,11 +140,11 @@ const listarUsuario = async function() {
                 return message.ERROR_NOT_FOUND // 404
             }
         }else{
-            return message.ERROR_INTERNAL_SERVER_MODEL // 500 na model
+            return message.ERROR_INTERNAL_SEVER_MODEL // 500 na model
         }
 
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500 na controller 
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500 na controller 
     }
 }
 
@@ -158,7 +158,7 @@ const buscarUsuario = async function(numero) {
 
         // Vendo se o id não está vazio e se é um número
         if ( id == ''|| id == null || id == undefined || isNaN(id)){
-            return message.ERROR_REQUIRED_FIELDS // status code 400
+            return message.ERROR_REQUIRED_FIEDLS// status code 400
 
         }else{
 
@@ -178,12 +178,12 @@ const buscarUsuario = async function(numero) {
                 }
 
             }else{
-                return message.ERROR_INTERNAL_SERVER_MODEL // 500
+                return message.ERROR_INTERNAL_SEVER_MODEL // 500
             }
         }
 
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500
     }
 }
 

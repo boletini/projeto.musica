@@ -1,11 +1,4 @@
 
-/*********************************************************************************************************************************************************************************
- *Objetivo: Criar o CRUD de dados da tabela de gênero no Banco de Dados
- *Data: 22/04/2025
- *Autor: Beatriz Boletini
- *Versão: 1.0
-***********************************************************************************************************************************************************************************/
-
 // Import da biblioteca do prisma client para realizar as ações no BD 
 const {PrismaClient} = require('@prisma/client')
 
@@ -27,6 +20,8 @@ const insertGenero = async function(item) {
             return false // BUG no BD
 
     } catch (error) {
+
+        console.log(error)
         return false // BUG de Programação         
     }
 }
@@ -87,11 +82,9 @@ const selectAllGenero = async function() {
 
 const selectByIdGenero = async function(number) {
     try {
-        // Recebe o ID
-        let id = number 
-        
+
         // Script SQL 
-        let sql = `select * from tbl_genero where id_genero=${id} `
+        let sql = `select * from tbl_genero where id_genero=${number} `
 
         // Encaminha o Script SQL para o BD
         let result = await prisma.$queryRawUnsafe(sql)

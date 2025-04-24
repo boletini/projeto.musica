@@ -1,3 +1,4 @@
+
 //import do arquivo de menssagens e status code 
 const message = require ('../../modulo/config.js')
 
@@ -9,14 +10,14 @@ const inserirGenero = async function(item, contentType){
     try {
         if(String(contentType).toLowerCase() == 'application/json'){
             if(item.genero  == '' || item.genero == null || item.genero == undefined || item.genero.lenght > 100){
-                return message.ERROR_REQUIRED_FIELDS //400
+                return message.ERROR_CONTENT_TYPE//400
             }else{
                 let resultGenero = await generoDAO.insertGenero(item)
 
                 if(resultGenero)
                     return message.SUCESS_CREATED_ITEM //201
                 else
-                    return message.ERROR_INTERNAL_SERVER_MODEL //500 -> erro model
+                    return message.ERROR_INTERNAL_SEVER_MODEL //500 -> erro model
             }
         }else{
             return message.ERROR_CONTENT_TYPE //415
@@ -36,7 +37,7 @@ const atualizarGenero = async function(numero, item, contentType) {
                 if( item.genero  == '' || item.genero == null || item.genero == undefined || item.genero.lenght > 100 ||
                     id           == '' || id          == null || id          == undefined || isNaN(id)
                 ){
-                    return message.ERROR_REQUIRED_FIELDS //400
+                    return message.ERROR_REQUIRE_FIEDLS//400
                 }else{
                     // Verifica se o ID está no Banco de dados 
                     let result = await generoDAO.selectByIdGenero(id)
@@ -51,7 +52,7 @@ const atualizarGenero = async function(numero, item, contentType) {
                             if(resultGenero){
                                 return message.SUCESS_UPDATE_ITEM // 200
                             }else{
-                                return message.ERROR_INTERNAL_SERVER_MODEL // 500- model
+                                return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
                             }
 
                         }else{
@@ -64,7 +65,7 @@ const atualizarGenero = async function(numero, item, contentType) {
             }
 
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500- controller
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500- controller
     }
 }
 
@@ -74,7 +75,8 @@ const excluirGenero = async function(numero) {
         let id = numero
 
         if ( id == ''|| id == null || id == undefined || isNaN(id)){
-            return message.ERROR_REQUIRED_FIELDS // status code 400
+            console.log(id)
+            return message.ERROR_REQUIRE_FIEDLS// status code 400
         }else{
             
             // Antes de excluir, estamos verificando se existe esse id 
@@ -86,19 +88,19 @@ const excluirGenero = async function(numero) {
                     let result = await generoDAO.deleteGenero(id)
                     
                     if(result)
-                        return message.SUCESS_DELETE_ITEM // 200
+                        return message.SUCESS_DELETED_ITEM // 200
                     else
-                        return message.ERROR_INTERNAL_SERVER_MODEL // 500- model
+                        return message.ERROR_INTERNAL_SEVER_MODEL // 500- model
 
                 }else{
                     return message.ERROR_NOT_FOUND // 404
                 }
             }else{
-                return message.ERROR_INTERNAL_SERVER_MODEL // 500- model
+                return message.ERROR_INTERNAL_SEVER_MODEL// 500- model
             }
         }
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500
     }
 }
 
@@ -123,22 +125,21 @@ const listarGenero = async function() {
                 return message.ERROR_NOT_FOUND // 404
             }
         }else{
-            return message.ERROR_INTERNAL_SERVER_MODEL // 500
+            return message.ERROR_INTERNAL_SEVER_MODEL // 500
         }   
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500
     }
 }
 
 // Função para retornar uma música pelo ID 
-const buscarGenero = async function(numero) {
+const buscarGenero = async function(id) {
     try {
-        let id = numero
 
         let dadosGenero = {}
 
         if ( id == ''|| id == null || id == undefined || isNaN(id)){
-            return message.ERROR_REQUIRED_FIELDS // status code 400
+            return message.ERROR_REQUIRE_FIEDLS// status code 400
         }else{
             // Chama a função para retornar as músicas do banco de dados
             let resultGenero = await generoDAO.selectByIdGenero(id)
@@ -154,11 +155,11 @@ const buscarGenero = async function(numero) {
                     return message.ERROR_NOT_FOUND // 404
                 }
             }else{
-                return message.ERROR_INTERNAL_SERVER_MODEL // 500
+                return message.ERROR_INTERNAL_SEVER_MODEL // 500
             }
         }
     } catch (error) {
-        return message.ERROR_INTERNAL_SERVER_CONTROLLER // 500
+        return message.ERROR_INTERNAL_SEVER_CONTROLLER // 500
     }
 }
 

@@ -12,23 +12,23 @@ const inserirArtista = async function(artista, contentType){
         {
             if(
                 artista.nome == undefined || artista.nome == '' || artista.nome == null || artista.nome.length > 50 ||
-                artista.data_nascimento == undefined || artista.data_nascimento == '' || artista.data_nascimento == null || artista.data_nascimento.length > 10 ||
+                artista.data_nascimento== undefined || artista.data_nascimento == '' || artista.data_nascimento == null || artista.data_nascimento.length > 50 ||
                 artista.biografia == undefined ||  artista.biografia.length > 250
             ){
-                return MESSAGE.ERROR_REQUIRE_FIELDS //400
+                return MESSAGE.ERROR_REQUIRE_FIEDLS //400
             }else{
                 let resultArtista = await artistaDAO.insertArtista(artista)
 
                 if(resultArtista)
-                    return MESSAGE.SUCCESS_CREATED_ITEM //201
+                    return MESSAGE.SUCESS_CREATED_ITEM //201
                 else
-                    return MESSAGE.ERROR_INTERNAL_SERVER_MODEL //500
+                    return MESSAGE.ERROR_INTERNAL_SEVER_MODEL//500
             }
         }else{
-            return MESSAGE.ERROR_CONTENT_TYPE //415
+            return MESSAGE.ERROR_CONTENT_TYPE//415
         }
     } catch (error) {
-        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
+        return MESSAGE.ERROR_INTERNAL_SEVER_CONTROLLER //500
     }
 }
 
@@ -49,14 +49,14 @@ const listarArtista = async function(){
                 dadosArtista.artista = resultArtista
                 return dadosArtista //200
             }else{
-                return MESSAGE.ERROR_NOT_FOUND //404
+                return MESSAGE.ERROR_NOT_FOUND//404
             }
         }else{
-            return MESSAGE.ERROR_INTERNAL_SERVER_MODEL //500
+            return MESSAGE.ERROR_INTERNAL_SEVER_MODEL //500
         }
 
     } catch (error) {
-        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
+        return MESSAGE.ERROR_INTERNAL_SEVER_CONTROLLER//500
     }
 }
 
@@ -64,7 +64,7 @@ const listarArtista = async function(){
 const buscarArtista = async function(id){
     try {
         if(id == '' || id == undefined || id == null || isNaN(id) || id <= 0){
-            return MESSAGE.ERROR_REQUIRE_FIELDS //400
+            return MESSAGE.ERROR_REQUIRE_FIEDLS //400
         }else{
             let dadosArtista = {}
             let resultArtista = await artistaDAO.selectByIdArtista(id)
@@ -79,11 +79,11 @@ const buscarArtista = async function(id){
                     return MESSAGE.ERROR_NOT_FOUND //404
                 }
             }else{
-                return MESSAGE.ERROR_INTERNAL_SERVER_MODEL //500
+                return MESSAGE.ERROR_INTERNAL_SEVER_MODEL //500
             }
         }
     } catch (error) {
-        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER //500
+        return MESSAGE.ERROR_INTERNAL_SEVER_CONTROLLER //500
     }
 }
 

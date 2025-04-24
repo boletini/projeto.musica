@@ -15,39 +15,41 @@ create table tbl_musica (
     letra			text
 );
 CREATE TABLE tbl_genero (
-    id_genero INT PRIMARY KEY,
+    id_genero int not null primary key auto_increment,,
     genero VARCHAR(80)
 );
 CREATE TABLE tbl_gravadora (
-    id_gravadora INT PRIMARY KEY,
+    id_gravadora int not null primary key auto_increment,
     nome VARCHAR(80),
     telefone VARCHAR(45),
     email VARCHAR(80)
 );
 CREATE TABLE tbl_tipo_album (
-    id_tipo INT PRIMARY KEY,
+    id_tipo int not null primary key auto_increment,
     tipo VARCHAR(80)
 );
 CREATE TABLE tbl_usuario (
-    id_usuario INT PRIMARY KEY,
+    id_usuario int not null primary key auto_increment,
     nome VARCHAR(80),
     foto_perfil VARCHAR(80),
     senha VARCHAR(45),
     email VARCHAR(80)
 );
 CREATE TABLE tbl_banda (
-    id_banda INT PRIMARY KEY,
+    id_banda int not null primary key auto_increment,
     nome VARCHAR(80),
     membros VARCHAR(80),
     quantidade_musica INT
 );
 CREATE TABLE tbl_artista (
-    id_artista INT PRIMARY KEY,
+    id_artista int not null primary key auto_increment,
     nome VARCHAR(80),
     data_nascimento DATE,
     biografia VARCHAR(100)
 );
 
+ALTER TABLE tbl_tipo_album MODIFY COLUMN id_tipo_album INT AUTO_INCREMENT;
+
 show tables;
-desc tbl_musica;
+desc tbl_genero;
 select * from tbl_musica;

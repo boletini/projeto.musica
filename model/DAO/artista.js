@@ -1,4 +1,3 @@
-//import da biblioteca Prisma/Client
 const { PrismaClient } = require('@prisma/client')
 
 //instanciando (criar um novo objeto) para realizar a manipulação do script SQL
@@ -14,8 +13,8 @@ const insertArtista = async function(artista){
                                             )
                                       values(
                                              '${artista.nome}',
-                                             '${artista.data_nascimento},
-                                             '${artista.biografia}'
+                                             '${artista.biografia}',
+                                             '${artista.data_nascimento}'
                                              )`
                                              
         let result = await prisma.$executeRawUnsafe(sql)
@@ -34,8 +33,8 @@ const insertArtista = async function(artista){
 const updateArtista = async function(artista){
     try {
         let sql = `update tbl_artista set nome= '${artista.nome}',
-                                            data_nascimento= '${artista.data_nascimento}',                            
-                                            biografia= '${artista.biografia}'
+                                            biografia= '${artista.biografia}',
+                                            nome= '${artista.data_nascimento}'
                                         where id=${artista.id}`
                         
         let result = await prisma.$executeRawUnsafe(sql)
